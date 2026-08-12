@@ -1,4 +1,6 @@
 #!/usr/bin/env python3
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2026 D-Robotics. All rights reserved.
 
 """Run guarded X5 OE Mapper PTQ checker, compile, and model verification stages."""
 

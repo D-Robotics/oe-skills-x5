@@ -1,4 +1,6 @@
 #!/usr/bin/env python3
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2026 D-Robotics. All rights reserved.
 
 """Parse one or more X5 hrut_somstatus snapshots into structured JSON."""
 
