@@ -6,8 +6,10 @@
 #
 # 用法: bash setup.sh <project-root>
 #
-# 将本脚本同级的 x5/ 目录中的资源铺设到 <project-root>/.drobotics/，
-# 并向 CLAUDE.md / AGENTS.md 注入路由规则。
+# 将资源铺设到 <project-root>/.drobotics/，并向 CLAUDE.md / AGENTS.md
+# 注入路由规则。资源位置自适应两种布局：
+#   - Pack 仓库根执行：资源在 ./x5/（本脚本同级子目录）
+#   - Hub 镜像目录执行：资源与本脚本同层（rsync 平铺 + setup.sh 覆盖层）
 #
 set -euo pipefail
 
@@ -23,7 +25,11 @@ if ! PROJECT_ROOT="$(cd "$1" 2>/dev/null && pwd)"; then
   echo "ERROR: 项目目录不存在或无法访问: $1" >&2
   exit 1
 fi
-DROBOTICS_SRC="$RESOURCE_DIR/x5"
+if [ -d "$RESOURCE_DIR/x5" ]; then
+  DROBOTICS_SRC="$RESOURCE_DIR/x5"
+else
+  DROBOTICS_SRC="$RESOURCE_DIR"
+fi
 DROBOTICS_DST="$PROJECT_ROOT/.drobotics"
 
 if [ ! -d "$DROBOTICS_SRC" ]; then
