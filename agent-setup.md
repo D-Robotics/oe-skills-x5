@@ -34,14 +34,24 @@ bash "$RESOURCE_DIR/setup.sh" "$PROJECT_ROOT"
 
 - 在 PROJECT_ROOT 下创建 `.drobotics/`。
 - 铺设 docs、skills、platforms、scripts、X5.md、skill-index.json、VERSION。
+- 记录 INSTALLED_REF（安装来源锚点；未用 `--ref` 时回退为 VERSION 值）。
 - 跳过含 eval.json 的 test/ 目录。
 - 向 CLAUDE.md 或 AGENTS.md 注入路由规则，且重复执行不会重复注入。
+
+### 升级已安装的 workspace
+
+```bash
+bash "$RESOURCE_DIR/setup.sh" --update --ref <已发布 tag> "$PROJECT_ROOT"
+```
+
+`--update` 先比较已安装 `.drobotics/VERSION` 与资源 VERSION：相同则直接跳过（幂等）；不同则**重建** `.drobotics/`（先删除再铺设，旧版残留文件会被清除，但用户在 `.drobotics/` 内的本地修改也会被丢弃）。`--force` 在版本相同时强制重建。`--ref` 记录进 `INSTALLED_REF` 供安装器比对 registry。
 
 ## 5. 安装后检查
 
 ```bash
 test -f "$PROJECT_ROOT/.drobotics/X5.md"
 test -f "$PROJECT_ROOT/.drobotics/VERSION"
+test -f "$PROJECT_ROOT/.drobotics/INSTALLED_REF"
 test -f "$PROJECT_ROOT/.drobotics/skill-index.json"
 test -f "$PROJECT_ROOT/.drobotics/skills/x5-router/SKILL.md"
 test -f "$PROJECT_ROOT/.drobotics/scripts/search_local_docs.py"
@@ -65,5 +75,5 @@ python .drobotics/scripts/search_local_docs.py --query "X5 hb_mapper makertbin"
 ## 8. 常见问题
 
 - 如果 setup.sh 报找不到 x5/ 目录，确认资源目录结构完整。
-- 如果 .drobotics/ 已存在，setup.sh 会覆盖 Pack 资源；请先确认其中没有需要保留的本地修改。
+- 如果 .drobotics/ 已存在：直接重跑安装是覆盖式铺设（合并，不删旧文件）；升级请用 `--update`（重建式，先删后铺、无旧文件残留，但 `.drobotics/` 内的本地修改会丢失）。
 - 如果找不到本地文档目录，设置 OE_DROBOTICS_DOC_ROOT 或使用 --root 指定文档根目录。
