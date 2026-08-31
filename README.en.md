@@ -27,6 +27,8 @@
 Install the `agent-setup.md` from this repository.
 ```
 
+Current release: `v1.0.0`.
+
 ### Local documentation retrieval
 
 This Pack does not depend on remote MCP documentation services. It discovers local X5 OpenExplorer documentation packages via environment variables or workspace-relative paths.
