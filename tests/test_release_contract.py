@@ -73,11 +73,12 @@ class X5ReleaseContractTests(unittest.TestCase):
             project = Path(temporary_directory) / "project"
             project.mkdir()
 
-            self.run_setup("--ref", RELEASE_REF, self.bash_path(project))
+            result = self.run_setup("--ref", RELEASE_REF, self.bash_path(project))
 
             installed = project / ".drobotics"
             self.assertEqual((installed / "VERSION").read_text().strip(), SOURCE_VERSION)
             self.assertEqual((installed / "INSTALLED_REF").read_text().strip(), RELEASE_REF)
+            self.assertNotIn("No such file or directory", result.stderr)
 
     def test_update_with_same_version_is_a_no_op(self) -> None:
         """Catch an --update path that rebuilds a matching installation."""
