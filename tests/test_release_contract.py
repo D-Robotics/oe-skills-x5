@@ -14,6 +14,10 @@ REPOSITORY_ROOT = Path(__file__).resolve().parents[1]
 SETUP_SCRIPT = "setup.sh"
 SOURCE_VERSION = "1.0.0"
 RELEASE_REF = "v1.0.0"
+CREATE_APP_TOKEN_ACTION = (
+    "actions/create-github-app-token@"
+    "fee1f7d63c2ff003460e3d139729b119787bc349"
+)
 
 
 def read_frontmatter(skill_file: Path) -> dict[str, str]:
@@ -141,7 +145,7 @@ class X5ReleaseContractTests(unittest.TestCase):
         self.assertEqual(document["permissions"], {"contents": "read"})
         self.assertIn("RDK_RELEASE_DISPATCHER_PRIVATE_KEY", workflow)
         self.assertIn("github.event.release.prerelease", workflow)
-        self.assertIn("actions/create-github-app-token@v2", workflow)
+        self.assertIn(CREATE_APP_TOKEN_ACTION, workflow)
         self.assertIn(
             "repos/D-Robotics/rdk-skills/actions/workflows/component-upgrade.yml/dispatches",
             workflow,
@@ -151,7 +155,7 @@ class X5ReleaseContractTests(unittest.TestCase):
         token_step = next(
             step
             for step in document["jobs"]["notify-hub"]["steps"]
-            if step.get("uses") == "actions/create-github-app-token@v2"
+            if step.get("uses") == CREATE_APP_TOKEN_ACTION
         )
         self.assertEqual(
             token_step["with"]["app-id"],
