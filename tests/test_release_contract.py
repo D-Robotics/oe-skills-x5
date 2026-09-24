@@ -15,8 +15,8 @@ import yaml
 
 REPOSITORY_ROOT = Path(__file__).resolve().parents[1]
 SETUP_SCRIPT = "setup.sh"
-SOURCE_VERSION = "1.1.0"
-RELEASE_REF = "v1.1.0"
+SOURCE_VERSION = "1.1.1"
+RELEASE_REF = "v1.1.1"
 CHECKOUT_ACTION = "actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683"
 CREATE_APP_TOKEN_ACTION = (
     "actions/create-github-app-token@"
@@ -42,6 +42,58 @@ def read_frontmatter(skill_file: Path) -> dict[str, str]:
 
 
 class X5ReleaseContractTests(unittest.TestCase):
+    def test_offline_artifact_validator_is_scoped_to_the_x5_pack(self) -> None:
+        validator = REPOSITORY_ROOT / "x5/scripts/validate_release_artifacts.py"
+        result = subprocess.run(
+            [sys.executable, str(validator)],
+            cwd=REPOSITORY_ROOT,
+            text=True,
+            capture_output=True,
+            check=False,
+        )
+        self.assertEqual(result.returncode, 0, result.stderr)
+
+        manifest = json.loads((REPOSITORY_ROOT / "x5/release-artifacts.json").read_text(encoding="utf-8"))
+        self.assertEqual(set(manifest["releases"]), {"x5-1.2.8"})
+        guide = (REPOSITORY_ROOT / "x5/docs/offline-artifact-delivery.md").read_text(encoding="utf-8")
+        self.assertNotIn("--release s-3.7.0", guide)
+        renderer = REPOSITORY_ROOT / "x5/scripts/release_artifacts.py"
+        rejected = subprocess.run(
+            [sys.executable, str(renderer), "--release", "s-3.7.0", "--mode", "list"],
+            cwd=REPOSITORY_ROOT,
+            text=True,
+            capture_output=True,
+            check=False,
+        )
+        self.assertEqual(rejected.returncode, 2)
+        self.assertIn("Unknown release: s-3.7.0", rejected.stderr)
+
+    def test_setup_installs_the_manifest_used_by_the_artifact_renderer(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            project = Path(temporary_directory) / "project"
+            project.mkdir()
+            self.run_setup(self.bash_path(project))
+
+            installed = project / ".drobotics-x5"
+            manifest = installed / "release-artifacts.json"
+            self.assertTrue(manifest.is_file(), "setup must install the renderer's default manifest")
+            rendered = subprocess.run(
+                [
+                    sys.executable,
+                    str(installed / "scripts/release_artifacts.py"),
+                    "--release",
+                    "x5-1.2.8",
+                    "--mode",
+                    "list",
+                ],
+                cwd=project,
+                text=True,
+                capture_output=True,
+                check=False,
+            )
+            self.assertEqual(rendered.returncode, 0, rendered.stderr)
+            self.assertIn("release=x5-1.2.8 platform=x5 version=1.2.8", rendered.stdout)
+
     def test_release_api_validator_accepts_only_published_stable_release(self) -> None:
         validator = REPOSITORY_ROOT / "tools" / "validate_release.py"
         self.assertTrue(validator.is_file(), validator)
@@ -192,7 +244,7 @@ class X5ReleaseContractTests(unittest.TestCase):
 
             result = self.run_setup("--update", self.bash_path(project))
 
-            self.assertIn("Upgrade: 0.9.0 -> 1.1.0", result.stdout)
+            self.assertIn("Upgrade: 0.9.0 -> 1.1.1", result.stdout)
             self.assertFalse(stale_file.exists())
             self.assertEqual((installed / "VERSION").read_text().strip(), SOURCE_VERSION)
 

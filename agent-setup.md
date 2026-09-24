@@ -54,7 +54,6 @@ test -f "$PROJECT_ROOT/.drobotics-x5/VERSION"
 test -f "$PROJECT_ROOT/.drobotics-x5/INSTALLED_REF"
 test -f "$PROJECT_ROOT/.drobotics-x5/skill-index.json"
 test -f "$PROJECT_ROOT/.drobotics-x5/skills/x5-router/SKILL.md"
-test -f "$PROJECT_ROOT/.drobotics-x5/scripts/search_local_docs.py"
 ```
 
 ## 6. 初始化后的使用顺序
@@ -62,18 +61,14 @@ test -f "$PROJECT_ROOT/.drobotics-x5/scripts/search_local_docs.py"
 1. 阅读 `.drobotics-x5/X5.md`，了解工作区规则和内置 Skill 清单。
 2. 以 `.drobotics-x5/skill-index.json` 查找具体 Skill 路径。
 3. 请求属于 X5 范畴但尚未落到具体 Skill 时，先使用 `.drobotics-x5/skills/x5-router/SKILL.md`。
-4. 对 API、参数、版本、流程或错误码不确定时，使用本地文档检索脚本。
+4. 给出或执行工具链命令、API、参数、版本门槛、流程或错误码前，使用官方文档 MCP 搜索 X5 手册并读取命中的页面正文。板端 X5 Python API 查询 `rdk-x` 手册；若没有官方页面明确支持所需结论，则报告阻塞。
 
-## 7. 配置本地文档检索
+## 7. 官方文档检索
 
-X5 使用 `OE_DROBOTICS_DOC_ROOT`（兼容 `OE_X_SERIES_DOC_ROOT`）。未设置时检索脚本从项目及其父级工作区相对发现对应版本目录。无需配置网络文档服务。
-
-```bash
-python .drobotics-x5/scripts/search_local_docs.py --query "X5 hb_mapper makertbin"
-```
+Codex 环境使用 `mcp__rdk_docs__search_docs`，X5 OE 手册参数为 `manual="oe-x5"`、`source="docs"`；板端 X5 Python API 可用 `manual="rdk-x"`。对检索到的官方 URL 必须再调用 `mcp__rdk_docs__get_page` 读取正文。包内离线材料不作为命令、API 或版本门槛的官方证据。
 
 ## 8. 常见问题
 
 - 如果 setup.sh 报找不到 x5/ 目录，确认资源目录结构完整。
 - 如果 .drobotics-x5/ 已存在：直接重跑安装是覆盖式铺设（合并，不删旧文件）；升级请用 `--update`（重建式，先删后铺、无旧文件残留，但 `.drobotics-x5/` 内的本地修改会丢失）。
-- 如果找不到本地文档目录，设置 OE_DROBOTICS_DOC_ROOT 或使用 --root 指定文档根目录。
+- 如果 MCP 服务不可用或没有匹配的官方页面，停止依赖该事实的工具链操作并报告阻塞；不要改用本地文档推断。

@@ -58,6 +58,62 @@ class X5RoutingPolicyTests(unittest.TestCase):
         self.assertEqual(policy["qat_gpu_probe"]["check"], "torch.cuda.is_available")
         self.assertEqual(policy["qat_gpu_probe"]["claim_scope"], "device_visibility_only")
 
+    def test_verified_docker_readiness_does_not_require_a_local_manual_package(self) -> None:
+        args = Namespace(
+            workflow="ptq",
+            board_chip=None,
+            board_version=None,
+            board_architecture=None,
+            board_reachable=False,
+            require_board=False,
+            docker_image="openexplorer/ai_toolchain_ubuntu_20_x5_cpu:test",
+            execution_mode=None,
+        )
+        unavailable = {"available": False, "path": None, "version": None}
+        verified_docker = {
+            "image": args.docker_image,
+            "image_available": True,
+            "verified": True,
+            "tools": ["hb_mapper", "hb_model_info"],
+            "error": None,
+        }
+        with (
+            patch.dict("os.environ", {"OE_DROBOTICS_DOC_ROOT": "", "OE_X_SERIES_DOC_ROOT": ""}),
+            patch.object(PROBE, "command_info", return_value=unavailable),
+            patch.object(PROBE, "package_info", return_value={"available": False, "version": None}),
+            patch.object(PROBE, "probe_docker_toolchain", return_value=verified_docker),
+        ):
+            snapshot = PROBE.build_snapshot(args)
+            PROBE.validate_snapshot(snapshot)
+
+        self.assertEqual(snapshot["status"], "ready")
+        self.assertEqual(snapshot["execution"]["selected_mode"], "docker")
+        self.assertIsNone(snapshot["documentation"]["available"])
+        self.assertEqual(snapshot["documentation"]["verification"], "not_checked_by_environment_probe")
+
+    def test_official_manual_references_are_urls_and_skills_do_not_name_local_sources(self) -> None:
+        for entry in self.index["skills"]:
+            for reference in entry["resources"]["references"]:
+                if reference.startswith("https://"):
+                    self.assertRegex(
+                        reference,
+                        r"^https://developer\.d-robotics\.cc/(?:oe_x5_doc|rdk_x_doc)/",
+                        reference,
+                    )
+                else:
+                    self.assertFalse(reference.startswith("_sources/"), reference)
+                    self.assertTrue((ROOT / "x5" / reference).is_file(), reference)
+
+        skill_files = (ROOT / "x5" / "skills").glob("**/SKILL.md")
+        for skill_file in skill_files:
+            with self.subTest(skill=skill_file.parent.name):
+                self.assertNotIn("_sources/", skill_file.read_text(encoding="utf-8"))
+
+        manual_map = (ROOT / "x5/platforms/x5/references/manual-map.md").read_text(encoding="utf-8")
+        self.assertIn("mcp__rdk_docs__search_docs", manual_map)
+        self.assertIn("mcp__rdk_docs__get_page", manual_map)
+        self.assertIn('manual="rdk-x"', manual_map)
+
     def test_host_toolchain_is_used_only_when_host_mode_is_explicit(self) -> None:
         with tempfile.TemporaryDirectory() as temporary:
             docs = Path(temporary)

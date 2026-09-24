@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.1.1 - 2026-09-24
+
+- Require official documentation MCP retrieval for X5 OE facts; local manuals remain optional and do not gate environment readiness.
+- Scope offline artifact manifests and validation to the X5 pack.
+- Clarify the conservative X5 Python API version boundary and require board evidence where official wording is ambiguous.
+
 ## 1.1.0 - 2026-09-24
 
 - Route unspecified X5 ONNX/Caffe quantization requests to PTQ by default, following the official OE guidance.

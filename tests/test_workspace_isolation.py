@@ -20,6 +20,10 @@ class WorkspaceIsolationTests(unittest.TestCase):
                 self.assertEqual(text.count("you MUST follow the project rules"), 1)
                 self.assertIn('.drobotics-x5' + "/" + 'X5.md', text)
                 self.assertNotIn('.drobotics' + "/", text)
+                self.assertIn("mcp__rdk_docs__search_docs", text)
+                self.assertIn("mcp__rdk_docs__get_page", text)
+                self.assertIn("If MCP is unavailable", text)
+                self.assertNotIn("search_local_docs.py", text)
                 self.assertIn("# User rules\nKeep my settings.", text)
                 for name in ('.drobotics', '.drobotics-s'):
                     self.assertEqual((project / name / "user-data").read_text(), "keep")

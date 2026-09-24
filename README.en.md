@@ -27,21 +27,15 @@
 Install the `agent-setup.md` from this repository.
 ```
 
-Current release: `v1.1.0`.
+Current release: `v1.1.1`.
 
 The official OE guide strongly recommends Docker. If the user does not specify a quantization method and provides an ONNX/Caffe model, start with PTQ. Consider QAT only when explicitly requested or when PTQ evaluation shows the target cannot be met. See the [X5 environment guide](https://developer.d-robotics.cc/oe_x5_doc/cn/oe_mapper/source/env_install/env_deploy.html) and [PTQ/QAT overview](https://developer.d-robotics.cc/oe_x5_doc/cn/oe_mapper/source/faststart/ptq_qat_overview.html).
 
 The QAT environment probe uses an X5 GPU image and Docker `--gpus all` to check `torch.cuda.is_available()`. This confirms device visibility inside the container only; it does not validate a training run.
 
-### Local documentation retrieval
+### Official documentation retrieval
 
-This Pack does not depend on remote MCP documentation services. It discovers local X5 OpenExplorer documentation packages via environment variables or workspace-relative paths.
-
-```bash
-python .drobotics-x5/scripts/search_local_docs.py --query "X5 hb_mapper makertbin"
-```
-
-X5 uses `OE_DROBOTICS_DOC_ROOT` (compatible with `OE_X_SERIES_DOC_ROOT`). If unset, the script discovers from workspace-relative directories.
+Verify OE commands, APIs, parameters, version limits, and workflows through the official documentation MCP before stating or executing them. For X5 OE, call `mcp__rdk_docs__search_docs` with `manual="oe-x5"` and `source="docs"`, then call `mcp__rdk_docs__get_page` for the matching official URL. For the board-side X5 Python API, use `manual="rdk-x"` and verify the X5 scope and version wording in the page. If MCP is unavailable or the official page does not establish the needed fact, stop dependent work and report the blocker. Local manuals and packaged Markdown are optional aids, not official evidence. The environment probe does not inspect a documentation directory or lower `ready` solely because offline manuals are absent. See `.drobotics-x5/docs/local-document-retrieval.md`.
 
 ## Usage
 

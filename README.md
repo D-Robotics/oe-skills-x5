@@ -27,23 +27,15 @@
 安装当前仓库中的 `agent-setup.md`。
 ```
 
-当前发布版本：`v1.1.0`。
+当前发布版本：`v1.1.1`。
 
 OE 官方强烈建议使用 Docker。量化方式未指定且模型为 ONNX/Caffe 时，先走 PTQ；只有明确要求 QAT 或 PTQ 评测确认无法达到目标时才考虑 QAT。详见 [OE X5 环境部署手册](https://developer.d-robotics.cc/oe_x5_doc/cn/oe_mapper/source/env_install/env_deploy.html) 和 [PTQ/QAT 简介](https://developer.d-robotics.cc/oe_x5_doc/cn/oe_mapper/source/faststart/ptq_qat_overview.html)。
 
 QAT 环境探测使用 X5 GPU image 和 Docker `--gpus all` 检查 `torch.cuda.is_available()`。这只确认 CUDA 设备在容器内可见，不代表训练过程已验证。
 
-### 本地文档检索
+### 官方文档检索
 
-本 Pack 不依赖远程 MCP 文档服务。补充参考从环境变量或工作区相对位置发现本地 X5 OpenExplorer 文档包。
-
-安装后可直接运行：
-
-```bash
-python .drobotics-x5/scripts/search_local_docs.py --query "X5 hb_mapper makertbin"
-```
-
-X5 使用 `OE_DROBOTICS_DOC_ROOT`（兼容 `OE_X_SERIES_DOC_ROOT`）。未设置时脚本会从工作区相对目录发现。更多规则见 `.drobotics-x5/docs/local-document-retrieval.md`。
+工具链命令、API、参数、版本门槛和流程必须先通过官方文档 MCP 核验：X5 OE 使用 `mcp__rdk_docs__search_docs`（`manual="oe-x5"`、`source="docs"`），再对匹配的官方 URL 调用 `mcp__rdk_docs__get_page`。板端 X5 Python API 使用 `manual="rdk-x"`，并核对页面中的 X5 适用范围与版本原文。MCP 不可用或官方页面没有明确证据时，停止依赖该细节的操作并报告阻塞；本地离线文档和包内 Markdown 仅供辅助，不作为官方依据。环境探测不会检查文档目录，也不会因未安装离线手册降低 `ready` 状态。详见 `.drobotics-x5/docs/local-document-retrieval.md`。
 
 ## 使用
 
