@@ -32,7 +32,7 @@ bash "$RESOURCE_DIR/setup.sh" "$PROJECT_ROOT"
 
 安装会：
 
-- 在 PROJECT_ROOT 下创建 `.drobotics/`。
+- 在 PROJECT_ROOT 下创建 `.drobotics-x5/`。
 - 铺设 docs、skills、platforms、scripts、X5.md、skill-index.json、VERSION。
 - 记录 INSTALLED_REF（安装来源锚点；未用 `--ref` 时回退为 VERSION 值）。
 - 跳过含 eval.json 的 test/ 目录。
@@ -44,24 +44,24 @@ bash "$RESOURCE_DIR/setup.sh" "$PROJECT_ROOT"
 bash "$RESOURCE_DIR/setup.sh" --update --ref v1.0.0 "$PROJECT_ROOT"
 ```
 
-`--update` 先比较已安装 `.drobotics/VERSION` 与资源 VERSION：相同则直接跳过（幂等）；不同则**重建** `.drobotics/`（先删除再铺设，旧版残留文件会被清除，但用户在 `.drobotics/` 内的本地修改也会被丢弃）。`--force` 在版本相同时强制重建。`--ref` 记录进 `INSTALLED_REF` 供安装器比对 registry。
+`--update` 先比较已安装 `.drobotics-x5/VERSION` 与资源 VERSION：相同则直接跳过（幂等）；不同则**重建** `.drobotics-x5/`（先删除再铺设，旧版残留文件会被清除，但用户在 `.drobotics-x5/` 内的本地修改也会被丢弃）。`--force` 在版本相同时强制重建。`--ref` 记录进 `INSTALLED_REF` 供安装器比对 registry。
 
 ## 5. 安装后检查
 
 ```bash
-test -f "$PROJECT_ROOT/.drobotics/X5.md"
-test -f "$PROJECT_ROOT/.drobotics/VERSION"
-test -f "$PROJECT_ROOT/.drobotics/INSTALLED_REF"
-test -f "$PROJECT_ROOT/.drobotics/skill-index.json"
-test -f "$PROJECT_ROOT/.drobotics/skills/x5-router/SKILL.md"
-test -f "$PROJECT_ROOT/.drobotics/scripts/search_local_docs.py"
+test -f "$PROJECT_ROOT/.drobotics-x5/X5.md"
+test -f "$PROJECT_ROOT/.drobotics-x5/VERSION"
+test -f "$PROJECT_ROOT/.drobotics-x5/INSTALLED_REF"
+test -f "$PROJECT_ROOT/.drobotics-x5/skill-index.json"
+test -f "$PROJECT_ROOT/.drobotics-x5/skills/x5-router/SKILL.md"
+test -f "$PROJECT_ROOT/.drobotics-x5/scripts/search_local_docs.py"
 ```
 
 ## 6. 初始化后的使用顺序
 
-1. 阅读 `.drobotics/X5.md`，了解工作区规则和内置 Skill 清单。
-2. 以 `.drobotics/skill-index.json` 查找具体 Skill 路径。
-3. 请求属于 X5 范畴但尚未落到具体 Skill 时，先使用 `.drobotics/skills/x5-router/SKILL.md`。
+1. 阅读 `.drobotics-x5/X5.md`，了解工作区规则和内置 Skill 清单。
+2. 以 `.drobotics-x5/skill-index.json` 查找具体 Skill 路径。
+3. 请求属于 X5 范畴但尚未落到具体 Skill 时，先使用 `.drobotics-x5/skills/x5-router/SKILL.md`。
 4. 对 API、参数、版本、流程或错误码不确定时，使用本地文档检索脚本。
 
 ## 7. 配置本地文档检索
@@ -69,11 +69,11 @@ test -f "$PROJECT_ROOT/.drobotics/scripts/search_local_docs.py"
 X5 使用 `OE_DROBOTICS_DOC_ROOT`（兼容 `OE_X_SERIES_DOC_ROOT`）。未设置时检索脚本从项目及其父级工作区相对发现对应版本目录。无需配置网络文档服务。
 
 ```bash
-python .drobotics/scripts/search_local_docs.py --query "X5 hb_mapper makertbin"
+python .drobotics-x5/scripts/search_local_docs.py --query "X5 hb_mapper makertbin"
 ```
 
 ## 8. 常见问题
 
 - 如果 setup.sh 报找不到 x5/ 目录，确认资源目录结构完整。
-- 如果 .drobotics/ 已存在：直接重跑安装是覆盖式铺设（合并，不删旧文件）；升级请用 `--update`（重建式，先删后铺、无旧文件残留，但 `.drobotics/` 内的本地修改会丢失）。
+- 如果 .drobotics-x5/ 已存在：直接重跑安装是覆盖式铺设（合并，不删旧文件）；升级请用 `--update`（重建式，先删后铺、无旧文件残留，但 `.drobotics-x5/` 内的本地修改会丢失）。
 - 如果找不到本地文档目录，设置 OE_DROBOTICS_DOC_ROOT 或使用 --root 指定文档根目录。

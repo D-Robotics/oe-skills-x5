@@ -27,7 +27,7 @@
 安装当前仓库中的 `agent-setup.md`。
 ```
 
-当前发布版本：`v1.0.0`。
+当前发布版本：`v1.0.1`。
 
 ### 本地文档检索
 
@@ -36,10 +36,10 @@
 安装后可直接运行：
 
 ```bash
-python .drobotics/scripts/search_local_docs.py --query "X5 hb_mapper makertbin"
+python .drobotics-x5/scripts/search_local_docs.py --query "X5 hb_mapper makertbin"
 ```
 
-X5 使用 `OE_DROBOTICS_DOC_ROOT`（兼容 `OE_X_SERIES_DOC_ROOT`）。未设置时脚本会从工作区相对目录发现。更多规则见 `.drobotics/docs/local-document-retrieval.md`。
+X5 使用 `OE_DROBOTICS_DOC_ROOT`（兼容 `OE_X_SERIES_DOC_ROOT`）。未设置时脚本会从工作区相对目录发现。更多规则见 `.drobotics-x5/docs/local-document-retrieval.md`。
 
 ## 使用
 
@@ -57,7 +57,7 @@ X5 使用 `OE_DROBOTICS_DOC_ROOT`（兼容 `OE_X_SERIES_DOC_ROOT`）。未设置
 OE-Skills-X5/
 ├── README.md                # 本文件
 ├── agent-setup.md           # Agent 安装指引文档
-├── setup.sh                 # 安装脚本，将 x5/ 资源铺设到目标项目 .drobotics/
+├── setup.sh                 # 安装脚本，将 x5/ 资源铺设到目标项目 .drobotics-x5/
 ├── LICENSE                  # Apache 2.0
 ├── x5/                      # 资源目录（安装时复制到目标项目）
 │   ├── X5.md                # 工作区规则和使用说明

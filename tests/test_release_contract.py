@@ -15,8 +15,8 @@ import yaml
 
 REPOSITORY_ROOT = Path(__file__).resolve().parents[1]
 SETUP_SCRIPT = "setup.sh"
-SOURCE_VERSION = "1.0.0"
-RELEASE_REF = "v1.0.0"
+SOURCE_VERSION = "1.0.1"
+RELEASE_REF = "v1.0.1"
 CHECKOUT_ACTION = "actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683"
 CREATE_APP_TOKEN_ACTION = (
     "actions/create-github-app-token@"
@@ -139,7 +139,7 @@ class X5ReleaseContractTests(unittest.TestCase):
 
             result = self.run_setup("--ref", RELEASE_REF, self.bash_path(project))
 
-            installed = project / ".drobotics"
+            installed = project / ".drobotics-x5"
             self.assertEqual((installed / "VERSION").read_text().strip(), SOURCE_VERSION)
             self.assertEqual((installed / "INSTALLED_REF").read_text().strip(), RELEASE_REF)
             self.assertNotIn("No such file or directory", result.stderr)
@@ -150,7 +150,7 @@ class X5ReleaseContractTests(unittest.TestCase):
             project = Path(temporary_directory) / "project"
             project.mkdir()
             self.run_setup(self.bash_path(project))
-            sentinel = project / ".drobotics" / "preserve-on-no-op.txt"
+            sentinel = project / ".drobotics-x5" / "preserve-on-no-op.txt"
             sentinel.write_text("keep", encoding="utf-8")
 
             result = self.run_setup("--update", self.bash_path(project))
@@ -164,14 +164,14 @@ class X5ReleaseContractTests(unittest.TestCase):
             project = Path(temporary_directory) / "project"
             project.mkdir()
             self.run_setup(self.bash_path(project))
-            installed = project / ".drobotics"
+            installed = project / ".drobotics-x5"
             (installed / "VERSION").write_text("0.9.0\n", encoding="utf-8")
             stale_file = installed / "stale-from-prior-release.txt"
             stale_file.write_text("remove", encoding="utf-8")
 
             result = self.run_setup("--update", self.bash_path(project))
 
-            self.assertIn("Upgrade: 0.9.0 -> 1.0.0", result.stdout)
+            self.assertIn("Upgrade: 0.9.0 -> 1.0.1", result.stdout)
             self.assertFalse(stale_file.exists())
             self.assertEqual((installed / "VERSION").read_text().strip(), SOURCE_VERSION)
 
@@ -181,7 +181,7 @@ class X5ReleaseContractTests(unittest.TestCase):
             project = Path(temporary_directory) / "project"
             project.mkdir()
             self.run_setup(self.bash_path(project))
-            stale_file = project / ".drobotics" / "stale-before-force.txt"
+            stale_file = project / ".drobotics-x5" / "stale-before-force.txt"
             stale_file.write_text("remove", encoding="utf-8")
 
             self.run_setup("--update", "--force", self.bash_path(project))

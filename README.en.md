@@ -27,14 +27,14 @@
 Install the `agent-setup.md` from this repository.
 ```
 
-Current release: `v1.0.0`.
+Current release: `v1.0.1`.
 
 ### Local documentation retrieval
 
 This Pack does not depend on remote MCP documentation services. It discovers local X5 OpenExplorer documentation packages via environment variables or workspace-relative paths.
 
 ```bash
-python .drobotics/scripts/search_local_docs.py --query "X5 hb_mapper makertbin"
+python .drobotics-x5/scripts/search_local_docs.py --query "X5 hb_mapper makertbin"
 ```
 
 X5 uses `OE_DROBOTICS_DOC_ROOT` (compatible with `OE_X_SERIES_DOC_ROOT`). If unset, the script discovers from workspace-relative directories.
