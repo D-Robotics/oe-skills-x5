@@ -6,11 +6,11 @@
 
 # 功能介绍
 
-* **工具链路由编排**：`x5-router` 作为顶层入口，依据 `skill-index.json` 中每个 Skill 的 `description` 字段分流到对应子 Skill
+* **工具链路由编排**：`x5-router` 作为顶层入口，按 `skill-index.json` 的 `routing_policy`、`intents`、`accepts` 和 `handoffs` 选择子 Skill；通用量化默认优先 PTQ
 
 * **端到端部署流程**：覆盖「量化 → 编译 → 板端推理 → 性能/精度评估」完整链路，全链路部署规范优先于单步 Skill 的默认行为
 
-* **环境检测**：自动探测开发板型号、OE 包版本、本地 Python/CUDA/PyTorch 匹配，按需创建 venv 安装
+* **环境检测**：默认检查 X5 OE Docker 工具链；只有显式设置 `--execution-mode host` 才使用宿主机 CLI；按需探测开发板和 Python/CUDA/PyTorch 环境
 
 * **精度调优**：QAT 适配与导出、PTQ 量化构建、混合精度调优、训练-部署一致性 debug、Cosine Similarity
 
@@ -27,7 +27,11 @@
 安装当前仓库中的 `agent-setup.md`。
 ```
 
-当前发布版本：`v1.0.1`。
+当前发布版本：`v1.1.0`。
+
+OE 官方强烈建议使用 Docker。量化方式未指定且模型为 ONNX/Caffe 时，先走 PTQ；只有明确要求 QAT 或 PTQ 评测确认无法达到目标时才考虑 QAT。详见 [OE X5 环境部署手册](https://developer.d-robotics.cc/oe_x5_doc/cn/oe_mapper/source/env_install/env_deploy.html) 和 [PTQ/QAT 简介](https://developer.d-robotics.cc/oe_x5_doc/cn/oe_mapper/source/faststart/ptq_qat_overview.html)。
+
+QAT 环境探测使用 X5 GPU image 和 Docker `--gpus all` 检查 `torch.cuda.is_available()`。这只确认 CUDA 设备在容器内可见，不代表训练过程已验证。
 
 ### 本地文档检索
 
@@ -46,8 +50,8 @@ X5 使用 `OE_DROBOTICS_DOC_ROOT`（兼容 `OE_X_SERIES_DOC_ROOT`）。未设置
 | **任务场景**    | **提示词**                                                                                                        | **调用skill**                      |
 | ----------- | -------------------------------------------------------------------------------------------------------------- | -------------------------------- |
 | 模型延时实测      | 帮我在开发板`xx.xx.xx.xx`上测试一下`xxx.bin`的延时                                                                           | x5-runtime-perf-eval           |
-| onnx精度优化    | 帮我对模型`xxx.onnx`做精度调优，校准数据路径为`{calib_data}`，使用`{OE_docker}`                                                     | x5-ptq-compile |
-| torch模型精度优化 | 模型校准后验证集 top-1 从浮点的 78% 掉到 55%。请帮我分析和调优，校准和评测代码：`{calib.py}`                                                   | x5-qat-adaptation       |
+| ONNX 模型 PTQ 部署 | 把 X5 ONNX 浮点模型量化部署，校准数据在`{calib_data}`，使用`{OE_docker}` | x5-ptq-deploy |
+| 明确要求 Plugin QAT | 请对这个 X5 可训练 PyTorch 模型执行 Plugin QAT，验证集为`{dataset}` | x5-qat-deploy |
 | 编写bin评测代码   | 帮我评测一下`xxx.bin`的精度，calib评测代码为`val.py`，开发板`xx.xx.xx.xx`。若网络延迟较高，减少评测帧数到100                                      | x5-bpu-python-api                 |
 | 编写bin部署代码   | 我有四个小模型，放在`{model_path}`，这几个模型间没有数据依赖，可同时推理，帮我写一下部署代码，测试使用开发板`xx.xx.xx.xx`                                  | x5-runtime-cpp-infer          |
 

@@ -6,11 +6,11 @@
 
 # Features
 
-* **Toolchain routing**: `x5-router` is the top-level entry point, dispatching to sub-Skills based on the `description` field in `skill-index.json`
+* **Toolchain routing**: `x5-router` is the top-level entry point, using `routing_policy`, `intents`, `accepts`, and `handoffs` from `skill-index.json`; unspecified quantization defaults to PTQ
 
 * **End-to-end deployment**: covers the full chain of quantization → compile → board inference → performance/accuracy evaluation
 
-* **Environment detection**: auto-detects board model, OE package version, local Python/CUDA/PyTorch matching, creates venv on demand
+* **Environment detection**: checks the X5 OE Docker toolchain by default; the host CLI is used only when `--execution-mode host` is selected, with board and Python/CUDA/PyTorch facts probed as needed
 
 * **Accuracy tuning**: QAT adaptation and export, PTQ quantization, mixed-precision tuning, training-deployment consistency debug, Cosine Similarity
 
@@ -27,7 +27,11 @@
 Install the `agent-setup.md` from this repository.
 ```
 
-Current release: `v1.0.1`.
+Current release: `v1.1.0`.
+
+The official OE guide strongly recommends Docker. If the user does not specify a quantization method and provides an ONNX/Caffe model, start with PTQ. Consider QAT only when explicitly requested or when PTQ evaluation shows the target cannot be met. See the [X5 environment guide](https://developer.d-robotics.cc/oe_x5_doc/cn/oe_mapper/source/env_install/env_deploy.html) and [PTQ/QAT overview](https://developer.d-robotics.cc/oe_x5_doc/cn/oe_mapper/source/faststart/ptq_qat_overview.html).
+
+The QAT environment probe uses an X5 GPU image and Docker `--gpus all` to check `torch.cuda.is_available()`. This confirms device visibility inside the container only; it does not validate a training run.
 
 ### Local documentation retrieval
 
@@ -44,8 +48,8 @@ X5 uses `OE_DROBOTICS_DOC_ROOT` (compatible with `OE_X_SERIES_DOC_ROOT`). If uns
 | **Task**         | **Prompt**                                                                                                        | **Skill**                      |
 | ----------- | -------------------------------------------------------------------------------------------------------------- | -------------------------------- |
 | Latency test      | Test the latency of `xxx.bin` on board `xx.xx.xx.xx`                                                                           | x5-runtime-perf-eval           |
-| ONNX accuracy    | Optimize accuracy for `xxx.onnx`, calibration data at `{calib_data}`, using `{OE_docker}`                                                     | x5-ptq-compile |
-| PyTorch accuracy | After calibration, val top-1 dropped from 78% to 55%. Please analyze and tune, calib/eval code: `{calib.py}`                                                   | x5-qat-adaptation       |
+| ONNX PTQ deployment | Quantize and deploy this X5 ONNX model with calibration data at `{calib_data}` using `{OE_docker}` | x5-ptq-deploy |
+| Explicit Plugin QAT | Run Plugin QAT for this trainable X5 PyTorch model and validate on `{dataset}` | x5-qat-deploy |
 | bin eval code   | Evaluate `xxx.bin` accuracy, eval code `val.py`, board `xx.xx.xx.xx`. Reduce frames to 100 if network is slow                                      | x5-bpu-python-api                 |
 | bin deploy code   | I have 4 small models in `{model_path}` with no data dependencies, can run in parallel. Write deployment code, test on board `xx.xx.xx.xx`                                  | x5-runtime-cpp-infer          |
 

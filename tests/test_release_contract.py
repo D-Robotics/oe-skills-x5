@@ -1,4 +1,4 @@
-"""Release contract tests for the X5 v1.0.0 source tree."""
+"""Release contract tests for the X5 source release."""
 
 from __future__ import annotations
 
@@ -15,8 +15,8 @@ import yaml
 
 REPOSITORY_ROOT = Path(__file__).resolve().parents[1]
 SETUP_SCRIPT = "setup.sh"
-SOURCE_VERSION = "1.0.1"
-RELEASE_REF = "v1.0.1"
+SOURCE_VERSION = "1.1.0"
+RELEASE_REF = "v1.1.0"
 CHECKOUT_ACTION = "actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683"
 CREATE_APP_TOKEN_ACTION = (
     "actions/create-github-app-token@"
@@ -127,9 +127,30 @@ class X5ReleaseContractTests(unittest.TestCase):
                 self.assertEqual(metadata.get("license"), "Apache-2.0")
                 self.assertEqual(metadata.get("version"), SOURCE_VERSION)
 
+    def test_skill_release_index_matches_all_skill_frontmatter_versions(self) -> None:
+        skill_files = sorted((REPOSITORY_ROOT / "x5" / "skills").glob("**/SKILL.md"))
+        frontmatter_ids = {read_frontmatter(path).get("name") for path in skill_files}
+        registry = json.loads(
+            (REPOSITORY_ROOT / "x5/platforms/x5/skill-index.json").read_text(encoding="utf-8")
+        )
+        registry_ids = {entry["id"] for entry in registry["skills"]}
+        manual_index = (REPOSITORY_ROOT / "x5/X5.md").read_text(encoding="utf-8")
+        listed_versions = dict(re.findall(r"`(x5-[a-z0-9-]+)@([0-9.]+)`", manual_index))
+
+        self.assertEqual(len(skill_files), 22)
+        self.assertEqual(registry_ids, frontmatter_ids)
+        self.assertEqual(set(listed_versions), frontmatter_ids)
+        self.assertTrue(all(version == SOURCE_VERSION for version in listed_versions.values()))
+
     def test_source_version_is_v1_release(self) -> None:
-        """Catch a setup source that would install a version other than v1.0.0."""
+        """Catch source metadata that does not match the current stable release."""
         self.assertEqual((REPOSITORY_ROOT / "x5" / "VERSION").read_text().strip(), SOURCE_VERSION)
+
+    def test_readmes_name_the_current_source_release(self) -> None:
+        for readme in ("README.md", "README.en.md"):
+            with self.subTest(readme=readme):
+                text = (REPOSITORY_ROOT / readme).read_text(encoding="utf-8")
+                self.assertIn(f"v{SOURCE_VERSION}", text)
 
     def test_fresh_install_records_release_ref_and_version(self) -> None:
         """Catch a fresh --ref install that fails to preserve its release anchor."""
@@ -171,7 +192,7 @@ class X5ReleaseContractTests(unittest.TestCase):
 
             result = self.run_setup("--update", self.bash_path(project))
 
-            self.assertIn("Upgrade: 0.9.0 -> 1.0.1", result.stdout)
+            self.assertIn("Upgrade: 0.9.0 -> 1.1.0", result.stdout)
             self.assertFalse(stale_file.exists())
             self.assertEqual((installed / "VERSION").read_text().strip(), SOURCE_VERSION)
 
